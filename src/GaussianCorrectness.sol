@@ -11,7 +11,6 @@ import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 /// -1e20 <= μ <= 1e20, 0 <= σ <= 1e19, -1e23 <= x <= 1e23, and an error rate of < 1e-8.
 contract GaussianCorrectness {
     using FixedPointMathLib for int256;
-    using FixedPointMathLib for uint256;
 
     // Constants
     int256 private constant WAD_INT = 1e18;
