@@ -15,6 +15,13 @@ Benchmarks were done on test cases generated using [generate_test.js](./generate
 
 On large test case sizes, the second implementation takes 50% more gas than the first implementation.
 
+## TODOs
+
+1. Add tests for edge cases
+2. Pack constants more efficiently
+3. Use more assembly for arithmetic, especially for constants unpacking
+4. Use a better approximation for the more simple / optimised implementation
+
 ## Usage
 
 ### Build
