@@ -3,7 +3,7 @@
 This repository contains 2 implementations of the Gaussian CDF function:
 
 1. The first implementation uses the Abramowitz and Stegun approximation, which unfortunately has an error rate of exactly 1e-8, and does not fit the constraints.
-2. The second implementation uses the Dia (2023) approximation, which has an error rate of < 1e-8 (2 \*\* -53 normalized, but due to arithmetic, this bounded below by fixed point arithmetic error) and fits the constraints, but uses significantly more gas.
+2. The second implementation uses the Dia (2023) approximation, which has an error rate of < 1e-8 (2 \*\* -53 for normal distribution) and fits the constraints, but uses significantly more gas.
 
 Hence, my submission is the second implementation.
 
