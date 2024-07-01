@@ -2,6 +2,7 @@
 pragma solidity ^0.8.4;
 
 import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
+import "./Errors.sol";
 
 /// @title Implementation of Gaussian CDF function
 /// @author Marcus Pang
@@ -25,9 +26,9 @@ contract Gaussian {
     int256 private constant P = 327591100;
 
     function gaussianCDF(int256 x, int256 mu, int256 sigma) public pure returns (int256) {
-        require(sigma > 0 && sigma <= 1e37, "Invalid sigma");
-        require(mu >= -1e38 && mu <= 1e38, "Invalid mu");
-        require(x >= -1e41 && x <= 1e41, "Invalid x");
+        if (sigma <= 0 || sigma > 1e37) revert InvalidSigma();
+        if (mu < -1e38 || mu > 1e38) revert InvalidMu();
+        if (x < -1e41 || x > 1e41) revert InvalidX();
 
         // Calculate (x - μ) / (σ * sqrt(2))
         int256 t = ((x - mu) * WAD_INT).rawSDivWad(sigma.rawSMulWad(SQRT_2));
