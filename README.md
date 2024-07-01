@@ -1,17 +1,19 @@
-## Foundry
+# Gaussian CDF
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+This repository contains 2 implementations of the Gaussian CDF function:
 
-Foundry consists of:
+1. The first implementation uses the Abramowitz and Stegun approximation, which unfortunately has an error rate of exactly 1e-8, and does not fit the constraints.
+2. The second implementation uses the Dia (2023) approximation, which has an error rate of < 1e-8 (2 \*\* -53 normalized, but due to arithmetic, this bounded below by fixed point arithmetic error) and fits the constraints, but uses significantly more gas.
 
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
+Hence, my submission is the second implementation.
 
-## Documentation
+## Gas Benchmarks
 
-https://book.getfoundry.sh/
+See [gas-snapshot](./.gas-snapshot) for more information.
+
+Benchmarks were done on test cases generated using [generate_test.js](./generate_test.js).
+
+On large test case sizes, the second implementation takes 50% more gas than the first implementation.
 
 ## Usage
 
@@ -37,30 +39,4 @@ $ forge fmt
 
 ```shell
 $ forge snapshot
-```
-
-### Anvil
-
-```shell
-$ anvil
-```
-
-### Deploy
-
-```shell
-$ forge script script/Counter.s.sol:CounterScript --rpc-url <your_rpc_url> --private-key <your_private_key>
-```
-
-### Cast
-
-```shell
-$ cast <subcommand>
-```
-
-### Help
-
-```shell
-$ forge --help
-$ anvil --help
-$ cast --help
 ```

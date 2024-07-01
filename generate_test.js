@@ -38,5 +38,5 @@ function writeTestCasesToFile(filename, testCases) {
   console.log(`Test cases written to ${filename}`);
 }
 
-const testCases = generateTestCases(1000);
-writeTestCasesToFile("test_cases.txt", testCases);
+const testCases = generateTestCases(5000);
+writeTestCasesToFile("large_test_cases.txt", testCases);
