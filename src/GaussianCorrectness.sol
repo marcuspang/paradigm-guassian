@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.20;
+pragma solidity ^0.8.4;
+
+import {FixedPointMathLib} from "solady/utils/FixedPointMathLib.sol";
 
 /// @title Implementation of Gaussian CDF function
 /// @author Marcus Pang
@@ -8,8 +10,11 @@ pragma solidity ^0.8.20;
 /// The implementation uses fixed-point arithmetic with 18 decimals. The values are bounded by
 /// -1e20 <= μ <= 1e20, 0 <= σ <= 1e19, -1e23 <= x <= 1e23, and an error rate of < 1e-8.
 contract GaussianCorrectness {
+    using FixedPointMathLib for int256;
+    using FixedPointMathLib for uint256;
+
     // Constants
-    int256 private constant FIXED_1 = 10 ** 18;
+    int256 private constant WAD_INT = 1e18;
     int256 private constant SQRT_2PI = 2506628274631000502; // sqrt(2π) * 1e18
 
     // Precomputed coefficients from the paper, scaled by 1e18
@@ -44,91 +49,38 @@ contract GaussianCorrectness {
     ];
 
     function gaussianCDF(int256 x, int256 mu, int256 sigma) public view returns (int256 erfc) {
-        require(sigma > 0 && sigma <= 10 ** 37, "Invalid sigma");
-        require(mu >= -int256(10 ** 38) && mu <= 10 ** 38, "Invalid mu");
-        require(x >= -int256(10 ** 41) && x <= 10 ** 41, "Invalid x");
+        require(sigma > 0 && sigma <= 1e37, "Invalid sigma");
+        require(mu >= -1e38 && mu <= 1e38, "Invalid mu");
+        require(x >= -1e41 && x <= 1e41, "Invalid x");
 
         // Standardize x
-        int256 z = ((x - mu) * FIXED_1) / sigma;
+        int256 z = ((x - mu) * WAD_INT) / sigma;
 
         int256 numerator = 0;
         int256 denominator = z + B_0;
 
         for (uint256 i = 0; i < 5; i++) {
-            int256 z_squared = (z * z) / FIXED_1;
-            numerator += (C_2[i] * z_squared / FIXED_1 + C_1[i]) * z / FIXED_1;
-
-            int256 term = z_squared + B_2[i] * z / FIXED_1 + B_1[i];
-
-            // Check for potential overflow and scale down if necessary
-            while (denominator != 0 && (denominator > type(int256).max / term || denominator < type(int256).min / term))
-            {
-                numerator /= 2;
-                denominator /= 2;
-                term /= 2;
-            }
-
-            denominator = (denominator * term) / FIXED_1;
+            int256 z_squared = z.rawSMulWad(z);
+            numerator += (C_2[i].rawSMulWad(z_squared) + C_1[i]).rawSMulWad(z);
+            denominator = denominator.rawSMulWad(z_squared + B_2[i].rawSMulWad(z) + B_1[i]);
         }
 
         // Compute M
-        int256 m = numerator / denominator;
+        int256 m = numerator.rawSDivWad(denominator);
 
         // Compute exp(-z^2/2)
-        int256 exp_term = exp(-(z * z) / (2 * FIXED_1));
+        int256 exp_term = (-z.rawSMulWad(z) / 2).expWad();
 
         // Compute erfc using the relation from Proposition 10
-        erfc = (SQRT_2PI * m * exp_term) / (FIXED_1 * FIXED_1);
+        erfc = (SQRT_2PI.rawSMulWad(m)).rawSMulWad(exp_term);
     }
 
     function normalCDF(int256 x, int256 mu, int256 sigma) public view returns (int256) {
         if (x < mu) {
-            return FIXED_1 - normalCDF(2 * mu - x, mu, sigma);
+            return WAD_INT - normalCDF(2 * mu - x, mu, sigma);
         } else {
             int256 erfc = gaussianCDF(x, mu, sigma);
-            return FIXED_1 - erfc / 2;
-        }
-    }
-
-    // Helper function to compute exp(-x) for x >= 0
-    function exp(int256 x) private pure returns (int256) {
-        // Handle the case where x is zero
-        if (x == 0) return FIXED_1;
-
-        // Handle very large negative values
-        if (x < -41 * FIXED_1) return 0;
-
-        // Handle very large positive values
-        if (x > 130 * FIXED_1) return type(int256).max;
-
-        bool is_negative = x < 0;
-        if (is_negative) x = -x;
-
-        // Use the first few terms of the Taylor series for e^x
-        int256 result = FIXED_1;
-        int256 term = FIXED_1;
-        for (int256 i = 1; i <= 32; i++) {
-            term = (term * x) / (i * FIXED_1);
-
-            // Check for potential overflow
-            if (result > type(int256).max - term) {
-                result = type(int256).max;
-                break;
-            }
-
-            result += term;
-
-            // Break if the term becomes too small to affect the result
-            if (term < FIXED_1 / 1e6) break;
-        }
-
-        if (is_negative) {
-            // For negative x, we compute e^(-x) and then take its reciprocal
-            // We need to be careful about potential division by zero
-            if (result == 0) return type(int256).max;
-            return (FIXED_1 * FIXED_1) / result;
-        } else {
-            return result;
+            return WAD_INT - erfc / 2;
         }
     }
 }

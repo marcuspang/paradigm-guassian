@@ -46,8 +46,8 @@ contract GaussianTest is Test {
             // which is 10e18 fixed point here
             // TODO: error rate is too high, at 1e-8
             int256 diff = result - expectedResult;
-            assertLe(diff, 10 ** 18);
-            assertGe(diff, -int256(10 ** 18));
+            assertLe(diff, 1e18);
+            assertGe(diff, -int256(1e18));
         }
     }
 }
