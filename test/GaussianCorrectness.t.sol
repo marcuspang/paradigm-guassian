@@ -8,7 +8,7 @@ import {GaussianTestHelper} from "./GaussianTestHelper.sol";
 contract GaussianTest is GaussianTestHelper {
     GaussianCorrectness public gaussian = new GaussianCorrectness();
 
-    function test_gaussianCDF() public view {
+    function test_gaussianCorrectnessCDF() public view {
         for (uint256 i = 0; i < testCases.length; i++) {
             int256 x = testCases[i][0];
             int256 mu = testCases[i][1];

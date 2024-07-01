@@ -1,2 +1,2 @@
 GaussianTest:test_gaussianCDF() (gas: 120735191)
-GaussianTest:test_gaussianCDF() (gas: 183929134)
+GaussianTest:test_gaussianCorrectnessCDF() (gas: 183929113)
