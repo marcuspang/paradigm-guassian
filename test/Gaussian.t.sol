@@ -7,15 +7,13 @@ import {GaussianTestHelper} from "./GaussianTestHelper.sol";
 import {Gaussian} from "../src/Gaussian.sol";
 
 contract GaussianTest is GaussianTestHelper {
-    Gaussian public gaussian = new Gaussian();
-
     function test_gaussianCDF() public view {
         for (uint256 i = 0; i < testCases.length; i++) {
             int256 x = testCases[i][0];
             int256 mu = testCases[i][1];
             int256 sigma = testCases[i][2];
             int256 expectedResult = testCases[i][3];
-            int256 result = gaussian.gaussianCDF(x, mu, sigma);
+            int256 result = Gaussian.gaussianCDF(x, mu, sigma);
 
             // check result is less than 1e-8 away from expected result
             // which is 10e18 fixed point here

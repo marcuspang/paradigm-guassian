@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.4;
+pragma solidity 0.8.25;
 
 // must be in the range of 0 < sigma <= 1e37
 error InvalidSigma();
